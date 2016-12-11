@@ -67,4 +67,16 @@
         android:layout_below="@+id/seekBar_green"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bt_devs_spinner"
+        android:layout_below="@+id/seekBar_blue"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="61dp"
+        android:spinnerMode="dropdown" />
+
+
 </RelativeLayout>
