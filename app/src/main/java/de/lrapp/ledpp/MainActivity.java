@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.Toast;
 
 
@@ -31,11 +33,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     BtComm btComm;
     ArrayAdapter<String> btDevsSpinnerAdapter;
 
+    Switch rainbowSwitch;
+    Switch rotRainbowSwitch;
+
     private byte[] color = {0, 0, 0};
 
     private final char cmdStart = 'S';
     private final  char cmdEnd = 'E';
     private final char cmdSingleColor = 'a';
+    private final char cmdRainbow = 'p';
+    private final char cmdRotRainbow = 'q';
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,35 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         greenSeekBar.setOnSeekBarChangeListener(this);
         blueSeekBar.setOnSeekBarChangeListener(this);
         btDevsSpinner.setOnItemSelectedListener(this);
+        rainbowSwitch = (Switch) findViewById(R.id.switch_rainbow);
+        rotRainbowSwitch = (Switch) findViewById(R.id.switch_rot_rainbow);
+
+        rainbowSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    rotRainbowSwitch.setChecked(false);
+                    redSeekBar.setProgress(0);
+                    greenSeekBar.setProgress(0);
+                    blueSeekBar.setProgress(0);
+
+                    setRainbow();
+                }
+            }
+        });
+
+        rotRainbowSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    rainbowSwitch.setChecked(false);
+                    redSeekBar.setProgress(0);
+                    greenSeekBar.setProgress(0);
+                    blueSeekBar.setProgress(0);
+
+                    setRotRainbow();
+                }
+            }
+        });
+
         btComm = new BtComm();
 
         permissionCheck();
@@ -166,6 +202,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     /**
+     * sends rainbow command
+     */
+    private void setRainbow() {
+        byte[] data = new byte[3];
+        data[0] = cmdStart;
+        data[1] = cmdRainbow;
+        data[2] = cmdEnd;
+        btComm.send(data);
+    }
+
+    /**
+     * sends rotating rainbow command
+     */
+    private void setRotRainbow() {
+        byte[] data = new byte[3];
+        data[0] = cmdStart;
+        data[1] = cmdRotRainbow;
+        data[2] = cmdEnd;
+        btComm.send(data);
+    }
+
+    /**
      * Callback method when seek bar progress has changed, reads color values from seek bar
      * @param seekBar The SeekBar whose progress has changed
      * @param progress The current progress level
@@ -173,6 +231,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        // uncheck switches
+        if (progress != 0) {
+            rainbowSwitch.setChecked(false);
+            rotRainbowSwitch.setChecked(false);
+        }
+
         int id = seekBar.getId();
         Log.i(TAG, "seek bar progress changed");
         switch (id) {
